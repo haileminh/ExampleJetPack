@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="background_dialog">#33000000</color>
+    <color name="ripple_dark">#F8F8F8</color>
+    <color name="ripple_light">#1A1A1A</color>
+    <color name="bottomNavigation">#1A1A1A</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="blue">#007AFF</color>
+    <color name="red">#ED1C24</color>
+
+    <color name="requiredRed">#C00000</color>
+
+
+    <color name="grey_dark">#878787</color>
+    <color name="grey_light">#E6E6E6</color>
+    <color name="black">@android:color/black</color>
+    <color name="white">#FFFFFF</color>
+
+
+    <!-- Text Color -->
+    <color name="text">#1A1A1A</color>
+    <color name="text_error">#ED1C24</color>
+    <color name="text_forgot_your_pass">#999999</color>
+
+    <!--  Button-->
+    <color name="button_dark">#1A1A1A</color>
+    <color name="button_light">#F8F8F8</color>
+    <color name="background_edit_text">#F2F2F2</color>
+    <color name="color_line">#FFE6E6E6</color>
+
+    <!--    Comment-->
+    <color name="text_comment">#999999</color>
+
+    <!--    Edit text-->
+    <color name="text_hint">#999999</color>
+    <color name="text_cursor">#0080FF</color>
+</resources>

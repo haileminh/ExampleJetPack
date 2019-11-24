@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.example.exampledemo.ui.main.view.NavigationBottom.NavigationBottomViewModel" />
+
+        <import type="com.example.exampledemo.common.Constants" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tab_navigation_height"
+        android:background="@drawable/bg_bottom_navigation">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_home"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_height"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="@{(v)->viewModel.onSelect(v)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_search"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/ivMenuHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tab_icon_margin_top"
+                android:src="@drawable/footer_tab_home"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.73"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:selected="@{viewModel.currentTab == Constants.TAB_HOME}" />
+
+            <TextView
+                style="@style/AppTheme.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/tab_title_margin_bottom"
+                android:fontFamily="@font/sf_pro_text_semi_bold"
+                android:gravity="center"
+                android:text="@string/lbl_home"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tab_title_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/ivMenuHome"
+                app:layout_constraintStart_toStartOf="@+id/ivMenuHome"
+                app:layout_constraintTop_toBottomOf="@+id/ivMenuHome" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_search"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_height"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="@{(v)->viewModel.onSelect(v)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_camera"
+            app:layout_constraintStart_toEndOf="@+id/item_home">
+
+            <ImageView
+                android:id="@+id/ivMenuSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tab_icon_margin_top"
+                android:src="@drawable/footer_tab_search"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.43"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:selected="@{viewModel.currentTab == Constants.TAB_SEARCH}" />
+
+            <TextView
+                style="@style/AppTheme.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/tab_title_margin_bottom"
+                android:fontFamily="@font/sf_pro_text_semi_bold"
+                android:gravity="center"
+                android:text="@string/lbl_search"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tab_title_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/ivMenuSearch"
+                app:layout_constraintStart_toStartOf="@+id/ivMenuSearch"
+                app:layout_constraintTop_toBottomOf="@+id/ivMenuSearch" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/item_camera"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_border_cam"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:divider="@color/black"
+            android:dividerHeight="1.0dp"
+            android:elevation="1dp"
+            android:onClick="@{(v)->viewModel.onSelect(v)}"
+            app:cardCornerRadius="36dp"
+            app:cardElevation="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/item_quiz"
+            app:layout_constraintStart_toEndOf="@+id/item_search"
+            app:layout_constraintTop_toTopOf="parent"
+            card_view:cardPreventCornerOverlap="false">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="18dp"
+                android:src="@drawable/ic_camera"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_quiz"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_height"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="@{(v)->viewModel.onSelect(v)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_profile"
+            app:layout_constraintStart_toEndOf="@+id/item_camera">
+
+            <ImageView
+                android:id="@+id/ivMenuQuiz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tab_icon_margin_top"
+                android:src="@{@drawable/ic_quiz}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.57"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                style="@style/AppTheme.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/tab_title_margin_bottom"
+                android:fontFamily="@font/sf_pro_text_semi_bold"
+                android:gravity="center"
+                android:text="@string/lbl_quiz"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tab_title_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/ivMenuQuiz"
+                app:layout_constraintStart_toStartOf="@+id/ivMenuQuiz"
+                app:layout_constraintTop_toBottomOf="@+id/ivMenuQuiz" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_profile"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/tab_height"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="@{(v)->viewModel.onSelect(v)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_quiz">
+
+            <ImageView
+                android:id="@+id/ivMenuProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tab_icon_margin_top"
+                android:src="@drawable/footer_tab_profile"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.27"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:selected="@{viewModel.currentTab == Constants.TAB_PROFILE}" />
+
+            <TextView
+                style="@style/AppTheme.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/tab_title_margin_bottom"
+                android:fontFamily="@font/sf_pro_text_semi_bold"
+                android:gravity="center"
+                android:lines="1"
+                android:text="@string/lbl_profile"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tab_title_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/ivMenuProfile"
+                app:layout_constraintStart_toStartOf="@+id/ivMenuProfile"
+                app:layout_constraintTop_toBottomOf="@+id/ivMenuProfile" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
