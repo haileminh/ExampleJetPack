@@ -17,9 +17,5 @@
 .idea/gradle.xml
 .idea/codeStyles/codeStyleConfig.xml
 .idea/codeStyles/Project.xml
-gradlew.bat
-gradlew
-gradle.properties
-settings.gradle
 gradle/wrapper/gradle-wrapper.properties
 gradle/wrapper/gradle-wrapper.jar
