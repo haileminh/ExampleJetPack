@@ -1,34 +1,36 @@
 package com.example.exampledemo.ui.camera
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Matrix
-import android.net.Uri
-import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.util.Size
 import android.view.Surface
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.camera.core.*
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.navigation.Navigation
 import com.example.exampledemo.R
 import com.example.exampledemo.app.BaseFragment
-import com.example.exampledemo.app.SakeDialog
 import com.example.exampledemo.common.Constants
 import com.example.exampledemo.databinding.FragmentCameraBinding
-import com.example.exampledemo.db.Storage
+import com.example.exampledemo.ui.ShareViewModel
 import kotlinx.android.synthetic.main.fragment_camera.*
+import java.io.File
+import java.util.concurrent.Executors
 
 
-class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
+class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), LifecycleOwner {
 
-    private var mPermissionCameraDialog: SakeDialog? = null
-    private lateinit var mPreview: Preview
+    private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+    private val executor = Executors.newSingleThreadExecutor()
     private var mImageCapture: ImageCapture? = null
+
+    private lateinit var mPreview: Preview
 
     private var mPreviewWidth = 0
     private var mPreviewHeight = 0
@@ -44,6 +46,12 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
     override fun onBinding() {
         mBinding.viewModel = mViewModel
 
+        ShareViewModel.get(activity!!).apply {
+            selectedFile.value = null
+            selectedFile.removeObserver(onSelectedFile)
+            selectedFile.observe(this@CameraFragment, onSelectedFile)
+        }
+
         mViewModel.action.observe(this, Observer { action ->
             if (action == CameraViewModel.TAKE_PHOTO_STATE) {
                 takePicture()
@@ -51,67 +59,29 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
             }
         })
 
-        cameraPreview.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
+
+        // Request camera permissions
+        if (allPermissionsGranted()) {
+            viewFinder.post { startCamera() }
+        } else {
+            ActivityCompat.requestPermissions(
+                activity!!,
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS
+            )
+        }
+
+        // Every time the provided texture view changes, recompute layout
+        viewFinder.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
             mPreviewWidth = right - left
             mPreviewHeight = bottom - top
 
-            if (mPreviewWidth > 0 && mPreviewHeight > 0) {
-                checkCameraPermission()
-            }
-        }
-    }
-
-    private fun takePicture() {
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (mPreviewWidth > 0 && mPreviewHeight > 0) {
-            checkCameraPermission()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        CameraX.unbindAll()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode != REQUEST_CODE_CAMERA_PERMISSIONS) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            return
+            updateTransform()
         }
 
-        Storage.instance.saveShouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        checkCameraPermission()
     }
 
-    private fun checkCameraPermission() {
-        mPermissionCameraDialog?.dismiss()
-        if (ContextCompat.checkSelfPermission(
-                context!!,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            setupCamera()
-            return
-        }
-
-        if (!Storage.instance.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CODE_CAMERA_PERMISSIONS)
-            return
-        }
-
-        showCameraPermissionPopup()
-    }
-
-    private fun setupCamera() {
-        Log.d(Constants.APP_NAME, "setup Camera")
+    private fun startCamera() {
         if (context == null) return
         CameraX.unbindAll()
         CameraX.ErrorListener { error, message ->
@@ -137,15 +107,29 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
             )
             Log.d(
                 Constants.APP_NAME,
-                "CameraPreview View ${cameraPreview.width}x${cameraPreview.height}"
+                "CameraPreview View ${viewFinder.width}x${viewFinder.height}"
             )
 
-            val parent = cameraPreview.parent as ViewGroup
-            parent.removeView(cameraPreview)
-            parent.addView(cameraPreview, 0)
+            val parent = viewFinder.parent as ViewGroup
+            parent.removeView(viewFinder)
+            parent.addView(viewFinder, 0)
 
-            cameraPreview.surfaceTexture = it.surfaceTexture
-            updateTransform(it)
+            viewFinder.surfaceTexture = it.surfaceTexture
+        }
+
+        // Build the viewfinder use case
+        val preview = Preview(previewConfig)
+
+        // Every time the viewfinder is updated, recompute layout
+        preview.setOnPreviewOutputUpdateListener {
+
+            // To update the SurfaceTexture, we have to remove it and re-add it
+            val parent = viewFinder.parent as ViewGroup
+            parent.removeView(viewFinder)
+            parent.addView(viewFinder, 0)
+
+            viewFinder.surfaceTexture = it.surfaceTexture
+            updateTransform()
         }
 
         // Capture
@@ -159,85 +143,97 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
         // Build the image capture use case and attach button click listener
         mImageCapture = ImageCapture(imageCaptureConfig)
 
-        CameraX.bindToLifecycle(this, mPreview, mImageCapture)
+        CameraX.bindToLifecycle(this, preview, mImageCapture)
     }
 
-    private fun updateTransform(po: Preview.PreviewOutput) {
+    private fun takePicture() {
+        val file = File(
+            context?.externalCacheDir,
+            "${System.currentTimeMillis()}.jpg"
+        )
+        mImageCapture?.takePicture(file, executor, object : ImageCapture.OnImageSavedListener {
+
+            override fun onImageSaved(file: File) {
+                val msg = "Photo capture succeeded: ${file.absolutePath}"
+                Log.d("CameraXApp", msg)
+                viewFinder.post {
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(
+                imageCaptureError: ImageCapture.ImageCaptureError,
+                message: String,
+                cause: Throwable?
+            ) {
+                val msg = "Photo capture failed: $message"
+                Log.e("CameraXApp", msg, cause)
+                viewFinder.post {
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        CameraX.unbindAll()
+    }
+
+    private fun updateTransform() {
         val matrix = Matrix()
 
         // Compute the center of the view finder
-        val centerX = cameraPreview.width / 2f
-        val centerY = cameraPreview.height / 2f
+        val centerX = viewFinder.width / 2f
+        val centerY = viewFinder.height / 2f
 
         // Correct preview output to account for display rotation
-        val rotationDegrees = when (cameraPreview.display.rotation) {
+        val rotationDegrees = when (viewFinder.display.rotation) {
             Surface.ROTATION_0 -> 0
             Surface.ROTATION_90 -> 90
             Surface.ROTATION_180 -> 180
             Surface.ROTATION_270 -> 270
             else -> return
         }
-
         matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
 
-        val width: Int
-        val height: Int
-        if (po.rotationDegrees == Surface.ROTATION_0 || po.rotationDegrees == Surface.ROTATION_180) {
-            width = po.textureSize.width
-            height = po.textureSize.height
-        } else {
-            width = po.textureSize.height
-            height = po.textureSize.width
-        }
-
-        Log.d(
-            Constants.APP_NAME,
-            "PREVIEW FROM ${width}x$height TO ${mPreviewWidth}x$mPreviewHeight | rotationDegrees: $rotationDegrees"
-        )
-
-        if (mPreviewWidth.toFloat() / mPreviewHeight > width.toFloat() / height) {
-            // scale HEIGHT
-            // ratio = desired height / real height
-            // desiredHeight = height * mPreviewWidth / width
-            matrix.postScale(1.0f, height.toFloat() * mPreviewWidth / width / mPreviewHeight)
-        } else {
-            // scale WIDTH
-            // ratio = desired width / real width
-            // desiredWith = width * mPreviewHeight / height
-            matrix.postScale(width.toFloat() * mPreviewHeight / height / mPreviewWidth, 1.0f)
-        }
-
-        cameraPreview.setTransform(matrix)
+        // Finally, apply transformations to our TextureView
+        viewFinder.setTransform(matrix)
     }
 
-    private fun showCameraPermissionPopup() {
-        if (mPermissionCameraDialog == null) {
-
-            mPermissionCameraDialog = SakeDialog()
-                .setTitle(R.string.tit_request_camera_permission)
-                .setMessage(R.string.msg_request_camera_permission)
-                .setLeftButton(R.string.act_cancel, object : SakeDialog.OnClickListener {
-                    override fun onClick() {
-                        Navigation.findNavController(mBinding.root).popBackStack()
-                    }
-
-                })
-                .setRightButton(R.string.act_setting, object : SakeDialog.OnClickListener {
-                    override fun onClick() {
-                        context?.let { ctx ->
-                            val intent = Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", ctx.packageName, null)
-                            )
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            startActivity(intent)
-                        }
-                    }
-
-                })
+    /**
+     * Process result from permission request dialog box, has the request
+     * been granted? If yes, start Camera. Otherwise display a toast
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                viewFinder.post { startCamera() }
+            } else {
+                Toast.makeText(
+                    context,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
+    }
 
-        mPermissionCameraDialog?.show(childFragmentManager)
+    /**
+     * Check if all permission specified in the manifest have been granted
+     */
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(context!!, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+
+    private val onSelectedFile = Observer<File?> { file ->
+        if (file != null) {
+            mViewModel.preview(file)
+        }
     }
 
     override fun onBackPressed(): Boolean {
@@ -249,6 +245,7 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>() {
     }
 
     companion object {
-        private const val REQUEST_CODE_CAMERA_PERMISSIONS = 10
+        private const val REQUEST_CODE_PERMISSIONS = 10
     }
 }
+
