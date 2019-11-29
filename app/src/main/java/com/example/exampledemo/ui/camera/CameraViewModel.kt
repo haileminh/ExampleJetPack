@@ -2,6 +2,8 @@ package com.example.exampledemo.ui.camera
 
 import android.view.View
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.Navigation
+import com.example.exampledemo.R
 import com.example.exampledemo.app.BaseViewModel
 import java.io.File
 
@@ -37,7 +39,7 @@ class CameraViewModel : BaseViewModel() {
     }
 
     fun onChoosePicture(v: View) {
-
+        Navigation.findNavController(v).navigate(R.id.galleryFragment)
     }
 
 
