@@ -2,6 +2,8 @@ package com.example.exampledemo.ui.camera
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.util.Log
 import android.util.Rational
@@ -16,16 +18,19 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.example.exampledemo.R
 import com.example.exampledemo.app.BaseFragment
+import com.example.exampledemo.app.SakeDialog
 import com.example.exampledemo.common.Constants
 import com.example.exampledemo.databinding.FragmentCameraBinding
 import com.example.exampledemo.ui.ShareViewModel
 import kotlinx.android.synthetic.main.fragment_camera.*
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.Executors
 
 
 class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), LifecycleOwner {
 
+    private var mPermissionCameraDialog: SakeDialog? = null
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     private val executor = Executors.newSingleThreadExecutor()
     private var mImageCapture: ImageCapture? = null
@@ -76,9 +81,21 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
             mPreviewWidth = right - left
             mPreviewHeight = bottom - top
 
+            if (mPreviewWidth > 0 && mPreviewHeight > 0) {
+                //TODO
+            }
+
             updateTransform()
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (mPreviewWidth > 0 && mPreviewHeight > 0) {
+            viewFinder.post { startCamera() }
+        }
     }
 
     private fun startCamera() {
@@ -94,7 +111,6 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
             setLensFacing(CameraX.LensFacing.BACK)
             setTargetResolution(Size(mPreviewWidth, mPreviewHeight))
         }.build()
-
         mPreview = Preview(previewConfig)
         mPreview.setOnPreviewOutputUpdateListener {
 
@@ -115,21 +131,7 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
             parent.addView(viewFinder, 0)
 
             viewFinder.surfaceTexture = it.surfaceTexture
-        }
-
-        // Build the viewfinder use case
-        val preview = Preview(previewConfig)
-
-        // Every time the viewfinder is updated, recompute layout
-        preview.setOnPreviewOutputUpdateListener {
-
-            // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = viewFinder.parent as ViewGroup
-            parent.removeView(viewFinder)
-            parent.addView(viewFinder, 0)
-
-            viewFinder.surfaceTexture = it.surfaceTexture
-            updateTransform()
+            updateTransform(it)
         }
 
         // Capture
@@ -143,22 +145,104 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
         // Build the image capture use case and attach button click listener
         mImageCapture = ImageCapture(imageCaptureConfig)
 
-        CameraX.bindToLifecycle(this, preview, mImageCapture)
+        CameraX.bindToLifecycle(this, mPreview, mImageCapture)
     }
 
     private fun takePicture() {
-        val file = File(
-            context?.externalCacheDir,
-            "${System.currentTimeMillis()}.jpg"
-        )
-        mImageCapture?.takePicture(file, executor, object : ImageCapture.OnImageSavedListener {
+//        val file = File(
+//            context?.externalCacheDir,
+//            "${System.currentTimeMillis()}.jpg"
+//        )
+//        mImageCapture?.takePicture(file, executor, object : ImageCapture.OnImageSavedListener {
+//
+//            override fun onImageSaved(file: File) {
+//                val msg = "Photo capture succeeded: ${file.absolutePath}"
+//                Log.d("CameraXApp", msg)
+//                viewFinder.post {
+//                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+//            override fun onError(
+//                imageCaptureError: ImageCapture.ImageCaptureError,
+//                message: String,
+//                cause: Throwable?
+//            ) {
+//                val msg = "Photo capture failed: $message"
+//                Log.e("CameraXApp", msg, cause)
+//                viewFinder.post {
+//                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+//        })
 
-            override fun onImageSaved(file: File) {
-                val msg = "Photo capture succeeded: ${file.absolutePath}"
-                Log.d("CameraXApp", msg)
-                viewFinder.post {
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        mImageCapture?.takePicture(executor, object : ImageCapture.OnImageCapturedListener() {
+            override fun onCaptureSuccess(image: ImageProxy?, rotationDegrees: Int) {
+
+                image?.image?.apply {
+                    val buffer = planes[0].buffer
+                    val bytes = ByteArray(buffer.remaining())
+                    buffer.get(bytes)
+                    var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+                    // route image
+                    if (rotationDegrees != 0) {
+                        val rotationMatrix = Matrix()
+                        rotationMatrix.postRotate(rotationDegrees.toFloat())
+                        bitmap = Bitmap.createBitmap(
+                            bitmap,
+                            0,
+                            0,
+                            bitmap.width,
+                            bitmap.height,
+                            rotationMatrix,
+                            true
+                        )
+
+                    }
+
+                    val deltaHeight: Int
+                    // crop image
+                    val newWidth: Int
+                    val newHeight: Int
+                    if (mPreviewWidth.toFloat() / mPreviewHeight > bitmap.width.toFloat() / bitmap.height) {
+                        newWidth = bitmap.width
+                        newHeight = bitmap.width * mPreviewHeight / mPreviewWidth
+                        deltaHeight =
+                            resources.displayMetrics.densityDpi * 50 * bitmap.width / mPreviewWidth / 160
+                    } else {
+                        newWidth = bitmap.height * mPreviewWidth / mPreviewHeight
+                        newHeight = bitmap.height
+                        deltaHeight =
+                            resources.displayMetrics.densityDpi * 50 * bitmap.height / mPreviewHeight / 160
+                    }
+                    bitmap = Bitmap.createBitmap(
+                        bitmap,
+                        0,
+                        0,
+                        newWidth,
+                        newHeight - deltaHeight
+                    )
+
+                    val file = File.createTempFile("sakeist", null)
+
+                    val fOut = FileOutputStream(file)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut)
+                    fOut.flush()
+                    fOut.close()
+
+                    Log.d(
+                        Constants.APP_NAME,
+                        "Save Image ${newWidth}x${newHeight - deltaHeight} TO Temporary ${file.absolutePath} ${file.length() / 1024f / 1024f}kB"
+                    )
+
+                    Log.d("FILE ", "====> $file")
+//                    mViewModel.preview(file)
+
                 }
+                image?.close()
+
             }
 
             override fun onError(
@@ -166,13 +250,8 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
                 message: String,
                 cause: Throwable?
             ) {
-                val msg = "Photo capture failed: $message"
-                Log.e("CameraXApp", msg, cause)
-                viewFinder.post {
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                }
+                Log.d(Constants.APP_NAME, "Take Picture has ERROR $message", cause)
             }
-
         })
     }
 
@@ -201,6 +280,55 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
         // Finally, apply transformations to our TextureView
         viewFinder.setTransform(matrix)
     }
+
+    private fun updateTransform(po: Preview.PreviewOutput) {
+        val matrix = Matrix()
+
+        // Compute the center of the view finder
+        val centerX = viewFinder.width / 2f
+        val centerY = viewFinder.height / 2f
+
+        // Correct preview output to account for display rotation
+        val rotationDegrees = when (viewFinder.display.rotation) {
+            Surface.ROTATION_0 -> 0
+            Surface.ROTATION_90 -> 90
+            Surface.ROTATION_180 -> 180
+            Surface.ROTATION_270 -> 270
+            else -> return
+        }
+
+        matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
+
+        val width: Int
+        val height: Int
+        if (po.rotationDegrees == Surface.ROTATION_0 || po.rotationDegrees == Surface.ROTATION_180) {
+            width = po.textureSize.width
+            height = po.textureSize.height
+        } else {
+            width = po.textureSize.height
+            height = po.textureSize.width
+        }
+
+        Log.d(
+            Constants.APP_NAME,
+            "PREVIEW FROM ${width}x$height TO ${mPreviewWidth}x$mPreviewHeight | rotationDegrees: $rotationDegrees"
+        )
+
+        if (mPreviewWidth.toFloat() / mPreviewHeight > width.toFloat() / height) {
+            // scale HEIGHT
+            // ratio = desired height / real height
+            // desiredHeight = height * mPreviewWidth / width
+            matrix.postScale(1.0f, height.toFloat() * mPreviewWidth / width / mPreviewHeight)
+        } else {
+            // scale WIDTH
+            // ratio = desired width / real width
+            // desiredWith = width * mPreviewHeight / height
+            matrix.postScale(width.toFloat() * mPreviewHeight / height / mPreviewWidth, 1.0f)
+        }
+
+        viewFinder.setTransform(matrix)
+    }
+
 
     /**
      * Process result from permission request dialog box, has the request
