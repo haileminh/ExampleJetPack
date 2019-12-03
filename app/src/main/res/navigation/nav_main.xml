@@ -9,16 +9,19 @@
         android:id="@+id/mainFragment"
         android:name="com.example.exampledemo.ui.main.MainFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_cameraFragment"
             app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_demoFragment"
+            app:destination="@id/demoFragment" />
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
         android:name="com.example.exampledemo.ui.camera.CameraFragment"
         android:label="fragment_camera"
-        tools:layout="@layout/fragment_camera" >
+        tools:layout="@layout/fragment_camera">
         <action
             android:id="@+id/action_cameraFragment_to_galleryFragment"
             app:destination="@id/galleryFragment" />
@@ -28,4 +31,18 @@
         android:name="com.example.exampledemo.ui.gallery.GalleryFragment"
         android:label="fragment_gallery"
         tools:layout="@layout/fragment_gallery" />
+    <fragment
+        android:id="@+id/demoFragment"
+        android:name="com.example.exampledemo.ui.demo.DemoFragment"
+        android:label="fragment_demo"
+        tools:layout="@layout/fragment_demo">
+        <action
+            android:id="@+id/action_demoFragment_to_drawFragment"
+            app:destination="@id/drawFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/drawFragment"
+        android:name="com.example.exampledemo.ui.demo.canvas.DrawFragment"
+        android:label="DrawFragment"
+        tools:layout="@layout/fragment_draw" />
 </navigation>

@@ -81,8 +81,10 @@ class NavigationBottom : ConstraintLayout {
                 }
 
                 Constants.TAB_PROFILE -> {
-                    currentTab.value = Constants.TAB_PROFILE
-                    onSelectedChange?.let { tabSelected -> tabSelected(Constants.TAB_PROFILE) }
+//                    currentTab.value = Constants.TAB_PROFILE
+//                    onSelectedChange?.let { tabSelected -> tabSelected(Constants.TAB_PROFILE) }
+                    Navigation.findNavController(v)
+                        .navigate(R.id.action_mainFragment_to_demoFragment)
                 }
 
                 Constants.TAB_CAMERA -> {

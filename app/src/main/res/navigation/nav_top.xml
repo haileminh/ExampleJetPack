@@ -15,4 +15,9 @@
         android:name="com.example.exampledemo.ui.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/demoFragment"
+        android:name="com.example.exampledemo.ui.demo.DemoFragment"
+        android:label="fragment_demo"
+        tools:layout="@layout/fragment_demo" />
 </navigation>
