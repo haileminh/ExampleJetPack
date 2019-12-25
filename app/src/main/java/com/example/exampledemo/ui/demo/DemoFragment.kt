@@ -19,5 +19,9 @@ class DemoFragment : BaseFragment<FragmentDemoBinding, DemoViewModel>() {
         btnCanvas.setOnClickListener {
             Navigation.findNavController(it).navigate(R.id.action_demoFragment_to_drawFragment)
         }
+
+        btnCountry.setOnClickListener {
+            Navigation.findNavController(it).navigate(R.id.action_demoFragment_to_countryFragment)
+        }
     }
 }

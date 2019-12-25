@@ -17,14 +17,29 @@
 
         <Button
             android:id="@+id/btnCanvas"
+            style="@style/AppTheme.Button.Light"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="18dp"
             android:layout_marginEnd="20dp"
+            android:text="Example"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/btnCountry"
+            style="@style/AppTheme.Button"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/country"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnCanvas" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

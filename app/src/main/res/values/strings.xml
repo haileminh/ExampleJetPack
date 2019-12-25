@@ -151,4 +151,6 @@
     <string name="start_using_camera">Start using camera</string>
     <string name="canvasContentDescription">Mini Paint is a simple line drawing app.
    Drag your fingers to draw. Rotate the phone to clear.</string>
+    <string name="country">Country</string>
+    <string name="header">Header</string>
 </resources>

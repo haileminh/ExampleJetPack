@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 abstract class BaseFragment<BD : ViewDataBinding, VM : BaseViewModel> : Fragment() {
     private var rootView: View? = null
     protected lateinit var mBinding: BD
-    protected lateinit var mViewModel: VM
+    protected lateinit var  mViewModel: VM
 
     private var binded: Boolean = false
 

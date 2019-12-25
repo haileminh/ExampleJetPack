@@ -39,10 +39,18 @@
         <action
             android:id="@+id/action_demoFragment_to_drawFragment"
             app:destination="@id/drawFragment" />
+        <action
+            android:id="@+id/action_demoFragment_to_countryFragment"
+            app:destination="@id/countryFragment" />
     </fragment>
     <fragment
         android:id="@+id/drawFragment"
         android:name="com.example.exampledemo.ui.demo.canvas.DrawFragment"
         android:label="DrawFragment"
         tools:layout="@layout/fragment_draw" />
+    <fragment
+        android:id="@+id/countryFragment"
+        android:name="com.example.exampledemo.ui.demo.country.CountryFragment"
+        android:label="fragment_country"
+        tools:layout="@layout/fragment_country" />
 </navigation>
