@@ -42,6 +42,12 @@
         <action
             android:id="@+id/action_demoFragment_to_countryFragment"
             app:destination="@id/countryFragment" />
+        <action
+            android:id="@+id/action_demoFragment_to_testFragment"
+            app:destination="@id/testFragment" />
+        <action
+            android:id="@+id/action_demoFragment_to_eggTimerFragment2"
+            app:destination="@id/eggTimerFragment2" />
     </fragment>
     <fragment
         android:id="@+id/drawFragment"
@@ -53,4 +59,14 @@
         android:name="com.example.exampledemo.ui.demo.country.CountryFragment"
         android:label="fragment_country"
         tools:layout="@layout/fragment_country" />
+    <fragment
+        android:id="@+id/testFragment"
+        android:name="com.example.exampledemo.ui.demo.test.TestFragment"
+        android:label="fragment_test"
+        tools:layout="@layout/fragment_test" />
+    <fragment
+        android:id="@+id/eggTimerFragment2"
+        android:name="com.example.exampledemo.ui.demo.fcm.EggTimerFragment"
+        android:label="EggTimerFragment"
+        tools:layout="@layout/fragment_egg_timer" />
 </navigation>

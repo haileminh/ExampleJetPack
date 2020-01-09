@@ -16,12 +16,18 @@ class DemoFragment : BaseFragment<FragmentDemoBinding, DemoViewModel>() {
     }
 
     override fun onBinding() {
+        mBinding.viewModel = mViewModel
+
         btnCanvas.setOnClickListener {
             Navigation.findNavController(it).navigate(R.id.action_demoFragment_to_drawFragment)
         }
 
         btnCountry.setOnClickListener {
             Navigation.findNavController(it).navigate(R.id.action_demoFragment_to_countryFragment)
+        }
+
+        btnDemo.setOnClickListener {
+            Navigation.findNavController(it).navigate(R.id.action_demoFragment_to_eggTimerFragment2)
         }
     }
 }
