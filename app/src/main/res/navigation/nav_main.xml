@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_demoFragment_to_eggTimerFragment2"
             app:destination="@id/eggTimerFragment2" />
+        <action
+            android:id="@+id/action_demoFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
     </fragment>
     <fragment
         android:id="@+id/drawFragment"
@@ -69,4 +72,9 @@
         android:name="com.example.exampledemo.ui.demo.fcm.EggTimerFragment"
         android:label="EggTimerFragment"
         tools:layout="@layout/fragment_egg_timer" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.exampledemo.ui.demo.chat.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_list_chat" />
 </navigation>

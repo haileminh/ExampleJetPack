@@ -170,4 +170,5 @@
    Drag your fingers to draw. Rotate the phone to clear.</string>
     <string name="country">Country</string>
     <string name="header">Header</string>
+    <string name="popup_window">Popup window</string>
 </resources>
