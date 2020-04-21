@@ -1,5 +1,22 @@
 <resources>
     <string name="app_name">ExampleDemo</string>
+    <string name="egg_prompt">How do you like your egg?</string>
+    <string name="timer_on">Start</string>
+    <string name="timer_off">Stop</string>
+    <string name="notification_title">Egg Timer</string>
+    <string name="notification_text">Your egg is ready!!</string>
+
+    <string name="fcm_message">FCM Message</string>
+    <string name="message_subscribe_failed">Failed to subscribe to topic</string>
+    <string name="message_subscribed">Subscribed to topic</string>
+    <string name="egg_notification_channel_id" translatable="false">egg_channel</string>
+    <string name="egg_notification_channel_name" translatable="true">Egg</string>
+    <string name="breakfast_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="breakfast_notification_channel_name" translatable="true">Breakfast</string>
+    <string name="eggs_ready">It is time! Bon appetit!</string>
+    <string name="timer_running">Egg timer is running...</string>
+    <string name="breakfast_notification_channel_description">Breakfast reminder</string>
+    <string name="snooze">Snooze</string>
 
     <!-- Multi Language -->
     <string name="tit_sign_in">Sign in</string>
@@ -149,4 +166,9 @@
     <string name="tit_request_storage_permission">tit_request_storage_permission</string>
     <string name="msg_request_storage_permission">msg_request_storage_permission</string>
     <string name="start_using_camera">Start using camera</string>
+    <string name="canvasContentDescription">Mini Paint is a simple line drawing app.
+   Drag your fingers to draw. Rotate the phone to clear.</string>
+    <string name="country">Country</string>
+    <string name="header">Header</string>
+    <string name="popup_window">Popup window</string>
 </resources>

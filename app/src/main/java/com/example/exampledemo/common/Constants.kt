@@ -24,4 +24,9 @@ object Constants {
 
     const val KEY_FILE = "file"
     const val KEY_PERMISSION = "permission"
+
+
+    const val NOTIFY_PUSH_ID = "google.message_id"
+    const val OREO_CHANNEL_ID = "com.example.exampledemo.oreoChannelId"
+    const val OREO_CHANNEL_NAME = "com.example.exampledemo.oreoChannelName"
 }

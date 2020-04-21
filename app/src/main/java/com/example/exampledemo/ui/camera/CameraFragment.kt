@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.Rational
 import android.util.Size
@@ -237,8 +239,7 @@ class CameraFragment : BaseFragment<FragmentCameraBinding, CameraViewModel>(), L
                         "Save Image ${newWidth}x${newHeight - deltaHeight} TO Temporary ${file.absolutePath} ${file.length() / 1024f / 1024f}kB"
                     )
 
-                    Log.d("FILE ", "====> $file")
-//                    mViewModel.preview(file)
+                    Handler(Looper.getMainLooper()).post { mViewModel.preview(file) }
 
                 }
                 image?.close()

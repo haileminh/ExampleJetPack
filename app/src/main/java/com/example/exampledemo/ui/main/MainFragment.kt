@@ -50,7 +50,7 @@ class MainFragment : BaseFragment<FragmentMainBinding, MainViewModel>() {
 
                 Constants.TAB_PROFILE -> {
                     activity?.findNavController(R.id.nav_top_host_fragment)
-                        ?.navigate(R.id.searchFragment)
+                        ?.navigate(R.id.demoFragment)
                 }
 
                 else -> return@setOnSelectedChange
